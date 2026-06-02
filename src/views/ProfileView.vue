@@ -5,32 +5,33 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
 </script>
 
 <template>
+  <div class="tabs">
+    <button
+        class="tab"
+        :class="{ active: activeTab === 'main' }"
+        @click="activeTab = 'main'"
+    >
+      Основные сведения
+    </button>
+
+    <button
+        class="tab"
+        :class="{ active: activeTab === 'contacts' }"
+        @click="activeTab = 'contacts'"
+    >
+      Контактная информация
+    </button>
+
+    <button
+        class="tab"
+        :class="{ active: activeTab === 'docs' }"
+        @click="activeTab = 'docs'"
+    >
+      Документы
+    </button>
+  </div>
   <div class="page">
-    <div class="tabs">
-      <button
-          class="tab"
-          :class="{ active: activeTab === 'main' }"
-          @click="activeTab = 'main'"
-      >
-        Основные сведения
-      </button>
 
-      <button
-          class="tab"
-          :class="{ active: activeTab === 'contacts' }"
-          @click="activeTab = 'contacts'"
-      >
-        Контактная информация
-      </button>
-
-      <button
-          class="tab"
-          :class="{ active: activeTab === 'docs' }"
-          @click="activeTab = 'docs'"
-      >
-        Документы
-      </button>
-    </div>
 
 
     <!-- основное -->
@@ -249,3 +250,60 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
 
   </div>
 </template>
+
+<style>
+
+.profile-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+      0 8px 24px rgba(0,0,0,.08),
+      0 2px 8px rgba(0,0,0,.04);
+  margin: 20px 0;
+}
+
+.profile-row {
+  min-height: 40px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #ececec;
+}
+
+.profile-row:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  font-size: 14px;
+  color: #8b8b8b;
+  margin-bottom: 8px;
+}
+
+.profile-value {
+  font-size: 20px;
+  font-weight: 500;
+  color: #222;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #ddd;
+  overflow: hidden;
+  margin: 20px auto 24px;
+  border: 4px solid white;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+}
+
+.profile-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+</style>
