@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import ProgramSelector from "@/components/ProgramSelector.vue";
 
 const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
 </script>
 
 <template>
+  <ProgramSelector />
   <div class="tabs">
     <button
         class="tab"
