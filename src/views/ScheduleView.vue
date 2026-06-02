@@ -12,21 +12,29 @@
       <option value="teacher" id="teacher">Месяц</option>
     </select>
     <select v-if="timetabletype == `group`">
-                             
+
     </select>
     <button @click="vKid" style="width:100px ; height: 20px;">Вывезти</button>
     <button @click="group_list" style="width:100px ; height: 20px;">group_list</button>
-    <BottomNav />
+    <div class="calendar">
+      <CalendarPicker @select="handleDate"/>
+    </div>
+
+
   </div>
 </template>
 
 <script setup>
 import {ref} from 'vue'
 import BottomNav from '../components/BottomNav.vue'
+import CalendarPicker from "@/components/CalendarPicker.vue";
 const choise_variable = ref('')
 const timetabletype = ref('')
 const id_whom = 27
 
+function handleDate(date) {
+  console.log('Выбрана дата:', date)
+}
 
 async function vKid(){
   const timetableduration = document.getElementById("timetableduration").value
@@ -49,10 +57,17 @@ async function group_list() {
     const response_group_list = fetch("/api/timetable/helperselect?type=3")
     const subject_group_list = (await response_group_list)
     console.log(subject_group_list)
-  } catch (error){
+  } catch (error) {
     console.log("Ошибк в загрузке списка групп", error)
   }
 }
 
 
+
 </script>
+
+<style>
+.calendar {
+  margin: 50px 0;
+}
+</style>
