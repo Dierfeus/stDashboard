@@ -14,10 +14,5 @@
       <p>Ауд. 212</p>
     </div>
 
-    <BottomNav />
   </div>
 </template>
-
-<script setup>
-import BottomNav from '../components/BottomNav.vue'
-</script>
