@@ -8,6 +8,7 @@ const id_whom = 27
 const mas_group = ref([])
 const mas_room = ref([])
 const mas_teacherstaff = ref([])
+let qweresult = ref([])
 timetable()
 teacherstaff()
 group_list()
@@ -75,15 +76,17 @@ async function teacherstaff() {
 }
 //Сделать автоматический рендер расписания при вводе всех значений в select
 async function timetable() {
-  try{
-    const result = await fetch(`https://api3.rb.asu.ru/api/v1/timetable/${timetabletype}/${timetableduration}/27/2026-06-01T08:40:58.882Z`)
-    const qweresult = await result.json()
+  try {
+    const result = await fetch(`https://asu.ru${timetabletype.value}/${timetableduration.value}/27/2026-06-01T08:40:58.882Z`)
+    
+    qweresult.value = await result.json()
+    
     console.log(qweresult.value[0].timeTable)
-    for(let i = 0; i< 8;i++){
+    for(let i = 0; i < 8; i++) {
       console.log(qweresult.value[0].timeTable[i].lessonNumber)
     }
-  } catch(error){
-    console.log("Лошара")
+  } catch(error) {
+    console.log("Лошара", error)
   }
 }
 </script>
@@ -116,11 +119,20 @@ async function timetable() {
     <CalendarPicker @select="handleDate" />
   </div>
   <button @click="timetable" style="width: 100px;height: 50px;"></button>
-  <table>
-    <tr>
-      <td v-for="elemas in source"></td>
+<table v-if="qweresult && qweresult.length > 0">
+  <tbody>
+    <tr 
+      v-for="(lessonNum, index) in qweresult[i]?.timeTable?.lessonNumber" 
+      :key="index"
+    >
+      <td>adx</td>
+      <td>ads</td>
     </tr>
-  </table>
+  </tbody>
+</table>
+<div v-else>
+  Загрузка расписания...
+</div>
   </div>
 
 
