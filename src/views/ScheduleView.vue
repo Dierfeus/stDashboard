@@ -1,20 +1,18 @@
 <script setup>
 import {ref} from 'vue'
-import BottomNav from '../components/BottomNav.vue'
 import CalendarPicker from "@/components/CalendarPicker.vue";
 const choise_variable = ref('')
 const timetabletype = ref('')
+const timetableduration = ref('')
 const id_whom = 27
 const mas_group = ref([])
 const mas_room = ref([])
 const mas_teacherstaff = ref([])
+timetable()
 teacherstaff()
 group_list()
 room_list()
 async function vKid(){
-  const timetableduration = document.getElementById("timetableduration").value
-  console.log(timetabletype)
-  console.log(timetableduration)
   try {
     const response = await fetch(`https://api3.rb.asu.ru/api/v1/timetable/${timetabletype}/${timetableduration}/27`);
     const subject_vkid = await response.json();
@@ -41,7 +39,6 @@ async function group_list() {
       mas_group.value = something.value.map(item => item.name)
     }
     
-    console.log(mas_group.value) 
   } catch (error) {
     console.error("Ошибка в загрузке списка групп", error)
   }
@@ -56,7 +53,6 @@ async function room_list() {
       mas_room.value = something.value.map(item => item.title)
     }
     
-    console.log(mas_room.value) 
   } catch (error) {
     console.error("Ошибка в загрузке списка групп", error)
   }
@@ -72,13 +68,24 @@ async function teacherstaff() {
       );
     }
     
-    console.log(mas_teacherstaff.value); 
     
   } catch (error) {
     console.error("Ошибка в загрузке списка преподавателей:", error);
   }
 }
-
+//Сделать автоматический рендер расписания при вводе всех значений в select
+async function timetable() {
+  try{
+    const result = await fetch(`https://api3.rb.asu.ru/api/v1/timetable/${timetabletype}/${timetableduration}/27/2026-06-01T08:40:58.882Z`)
+    const qweresult = await result.json()
+    console.log(qweresult.value[0].timeTable)
+    for(let i = 0; i< 8;i++){
+      console.log(qweresult.value[0].timeTable[i].lessonNumber)
+    }
+  } catch(error){
+    console.log("Лошара")
+  }
+}
 </script>
 
 <template>
@@ -89,7 +96,7 @@ async function teacherstaff() {
       <option id="room" value="room">Аудитория</option>
       <option id="teacher" value="teacher">Преподаватель</option>
     </select>
-    <select name="" id="timetableduration">
+    <select v-model="timetableduration">
       <option value="day" id="day">День</option>
       <option value="week" id="week">Неделя</option>
       <option value="teacher" id="teacher">Месяц</option>
@@ -108,8 +115,15 @@ async function teacherstaff() {
   <div class="calendar">
     <CalendarPicker @select="handleDate" />
   </div>
-
+  <button @click="timetable" style="width: 100px;height: 50px;"></button>
+  <table>
+    <tr>
+      <td v-for="elemas in source"></td>
+    </tr>
+  </table>
   </div>
+
+
 </template>
 
 <style module>
