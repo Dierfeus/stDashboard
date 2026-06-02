@@ -1,23 +1,58 @@
 <template>
   <div class="page">
-    <h1 class="title">Расписание</h1>
-
-    <div class="card">
-      <h3>08:30 - 10:00</h3>
-      <p>Базы данных</p>
-      <p>Ауд. 305</p>
-    </div>
-
-    <div class="card">
-      <h3>10:10 - 11:40</h3>
-      <p>Программирование</p>
-      <p>Ауд. 212</p>
-    </div>
-
+    <!--<input v-model="choise_variable" />-->
+    <select v-model="timetabletype">
+      <option id="group" value="group">Группа</option>
+      <option id="room" value="room">Аудитория</option>
+      <option id="teacher" value="teacher">Преподаватель</option>
+    </select>
+    <select name="" id="timetableduration">
+      <option value="day" id="day">День</option>
+      <option value="week" id="week">Неделя</option>
+      <option value="teacher" id="teacher">Месяц</option>
+    </select>
+    <select v-if="timetabletype == `group`">
+                             
+    </select>
+    <button @click="vKid" style="width:100px ; height: 20px;">Вывезти</button>
+    <button @click="group_list" style="width:100px ; height: 20px;">group_list</button>
     <BottomNav />
   </div>
 </template>
 
 <script setup>
+import {ref} from 'vue'
 import BottomNav from '../components/BottomNav.vue'
+const choise_variable = ref('')
+const timetabletype = ref('')
+const id_whom = 27
+
+
+async function vKid(){
+  const timetableduration = document.getElementById("timetableduration").value
+  console.log(timetabletype)
+  console.log(timetableduration)
+  try {
+    const response_vkid = await fetch(`https://api3.rb.asu.ru/api/v1/timetable/${timetabletype}/${timetableduration}/27`);
+    const subject_vkid = await response_vkid.json();
+    console.log(subject_vkid.value[0]); 
+  } catch (error) {
+    console.error("Ошибка при загрузке расписания:", error);
+  }
+}
+//const subject = fetch('https://api3.rb.asu.ru/api/v1/timetable/room/day/27')
+//console.log(subject)
+
+
+async function group_list() {
+  try {
+    const response_group_list = fetch("/api/timetable/helperselect?type=3")
+    const subject_group_list = (await response_group_list)
+    console.log(subject_group_list)
+  } catch (error){
+    console.log("Ошибк в загрузке списка групп", error)
+  }
+}
+
+
 </script>
