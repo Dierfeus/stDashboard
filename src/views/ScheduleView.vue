@@ -1,6 +1,7 @@
 <script setup>
 import {ref} from 'vue'
 import BottomNav from '../components/BottomNav.vue'
+import CalendarPicker from "@/components/CalendarPicker.vue";
 const choise_variable = ref('')
 const timetabletype = ref('')
 const id_whom = 27
@@ -25,6 +26,10 @@ async function vKid(){
 //const subject = fetch('https://api3.rb.asu.ru/api/v1/timetable/room/day/27')
 //console.log(subject)
 
+
+function handleDate(date) {
+  console.log('Выбрана дата:', date)
+}
 
 async function group_list() {
     try {
@@ -100,10 +105,15 @@ async function teacherstaff() {
     <option v-for="item_mas_teacherstaff in mas_teacherstaff">{{ item_mas_teacherstaff }}</option>
 
   </select>
-    <BottomNav />
+  <div class="calendar">
+    <CalendarPicker @select="handleDate" />
+  </div>
+
   </div>
 </template>
 
 <style module>
-
+.calendar {
+  margin: 50px 0;
+}
 </style>
