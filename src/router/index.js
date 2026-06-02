@@ -9,7 +9,7 @@ import ProfileView from '../views/ProfileView.vue'
 export default createRouter({
     history: createWebHistory(),
     routes: [
-        { path: '/', component: LoginView },
+        { path: '/', component: LoginView, meta: { hideNav: true } },
         { path: '/home', component: HomeView },
         { path: '/schedule', component: ScheduleView },
         { path: '/grades', component: GradesView },
