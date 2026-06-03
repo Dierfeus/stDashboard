@@ -1,5 +1,5 @@
 <script setup>
-import {ref} from 'vue'
+import {onMounted, ref, watch} from 'vue'
 import CalendarPicker from "@/components/CalendarPicker.vue";
 const choise_variable = ref('')
 const timetabletype = ref('')
@@ -9,6 +9,8 @@ const mas_group = ref([])
 const mas_room = ref([])
 const mas_teacherstaff = ref([])
 let qweresult = ref([])
+const selectedId = ref(27)
+const dates = ref('')
 timetable()
 teacherstaff()
 group_list()
@@ -28,6 +30,7 @@ async function vKid(){
 
 function handleDate(date) {
   console.log('Выбрана дата:', date)
+  dates.value = date
 }
 
 async function group_list() {
@@ -74,65 +77,95 @@ async function teacherstaff() {
     console.error("Ошибка в загрузке списка преподавателей:", error);
   }
 }
-//Сделать автоматический рендер расписания при вводе всех значений в select
+function formatTimeRange(startTime, endTime) {
+  if (!startTime || !endTime) return '—'
+  
+  const start = startTime.split('T')[1]?.slice(0, 5) || startTime
+  const end = endTime.split('T')[1]?.slice(0, 5) || endTime
+  
+  return `${start} - ${end}`
+}
+
 async function timetable() {
   try {
-    const result = await fetch(`https://asu.ru${timetabletype.value}/${timetableduration.value}/27/2026-06-01T08:40:58.882Z`)
-    
-    qweresult.value = await result.json()
-    
-    console.log(qweresult.value[0].timeTable)
-    for(let i = 0; i < 8; i++) {
-      console.log(qweresult.value[0].timeTable[i].lessonNumber)
+    const type = timetabletype.value
+    const duration = timetableduration.value
+    const id = selectedId.value
+  
+    if (!type || !duration) {
+      console.log("Выберите все параметры")
+      return
     }
+    
+    const url = `https://api3.rb.asu.ru/api/v1/timetable/${type}/${duration}/${id}`
+    console.log(fetch('https://api3.rb.asu.ru/api/v1/timetable/group/day/27'))
+    const response = await fetch(url)
+    const data = await response.json()
+    qweresult.value = data
+    
+    console.log("Расписание загружено:", data)
+    
   } catch(error) {
-    console.log("Лошара", error)
+    console.error("Ошибка:", error)
   }
+
 }
+
+if (timetabletype && timetableduration && dates) {
+  timetable()
+}
+
 </script>
 
 <template>
   <div class="page">
     <!--<input v-model="choise_variable" />-->
-    <select v-model="timetabletype">
+    <select @input="timetable" v-model="timetabletype">
       <option id="group" value="group">Группа</option>
       <option id="room" value="room">Аудитория</option>
       <option id="teacher" value="teacher">Преподаватель</option>
     </select>
-    <select v-model="timetableduration">
+    <select @input="timetable" v-model="timetableduration">
       <option value="day" id="day">День</option>
       <option value="week" id="week">Неделя</option>
       <option value="teacher" id="teacher">Месяц</option>
     </select>
-   <select  v-if="timetabletype === 'group'">
+   <select @input="timetable"  v-if="timetabletype === 'group'">
   <option  v-for="item_mas_group in mas_group">{{ item_mas_group }}</option>
   </select>
-  <select v-if="timetabletype == 'room'">
+  <select @input="timetable" v-if="timetabletype == 'room'">
     <option v-for="item_mas_room in mas_room">{{ item_mas_room }}</option>
 
   </select>
-  <select v-if="timetabletype == 'teacher'">
+  <select @input="timetable" v-if="timetabletype == 'teacher'">
     <option v-for="item_mas_teacherstaff in mas_teacherstaff">{{ item_mas_teacherstaff }}</option>
 
   </select>
   <div class="calendar">
-    <CalendarPicker @select="handleDate" />
+    <CalendarPicker ref="dates" @select="handleDate" />
   </div>
   <button @click="timetable" style="width: 100px;height: 50px;"></button>
-<table v-if="qweresult && qweresult.length > 0">
-  <tbody>
-    <tr 
-      v-for="(lessonNum, index) in qweresult[i]?.timeTable?.lessonNumber" 
-      :key="index"
-    >
-      <td>adx</td>
-      <td>ads</td>
-    </tr>
-  </tbody>
-</table>
-<div v-else>
-  Загрузка расписания...
-</div>
+    <table v-if="qweresult && qweresult.value && qweresult.value.length > 0" border="1" cellpadding="8" cellspacing="0">
+      <thead>
+        <tr>
+          <th>№ пары</th>
+          <th>Время</th>
+          <th>Дисциплина</th>
+          <th>Преподаватель</th>
+          <th>Аудитория</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="lesson in qweresult.value[0]?.timeTable" :key="lesson.lessonNumber">{{ console.log(lesson) }}
+          {{ console.log(fetch('') ) }}
+          <td>{{ lesson.LessonNumber }}</td>
+          <td>{{ formatTimeRange(lesson.startTime, lesson.endTime) }}</td>
+          <td>{{ lesson.timeTable || '—' }}</td>
+          <td>{{ lesson.timeTable  || '—' }}</td>
+          <td>{{ lesson.timeTable || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 
