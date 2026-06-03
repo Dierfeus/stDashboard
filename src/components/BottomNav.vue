@@ -60,6 +60,7 @@ const translateX = computed(() => {
   padding: 8px;
   box-sizing: border-box;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,.3);
 }
 
 .active-pill {

@@ -1,31 +1,28 @@
 <template>
   <div class="calendar">
     <div class="calendar-header">
-      <button @click="prevMonth">←</button>
-
-      <span>
-        {{ monthNames[currentMonth] }} {{ currentYear }}
-      </span>
-
-      <button @click="nextMonth">→</button>
+      <button class="nav-btn" @click="prevMonth">←</button>
+      <span class="month-year">{{ monthNames[currentMonth] }} {{ currentYear }}</span>
+      <button class="nav-btn" @click="nextMonth">→</button>
     </div>
 
     <div class="weekdays">
-      <div v-for="day in weekdays" :key="day">
+      <div v-for="day in weekdays" :key="day" class="weekday">
         {{ day }}
       </div>
     </div>
 
     <div class="days">
       <div
-          v-for="(day, index) in calendarDays"
-          :key="index"
-          class="day-cell"
+        v-for="(day, index) in calendarDays"
+        :key="index"
+        class="day-cell"
       >
         <button
-            v-if="day"
-            class="day-btn"
-            @click="selectDate(day)"
+          v-if="day"
+          class="day-btn"
+          :class="{ 'selected': isSelected(day) }"
+          @click="selectDate(day)"
         >
           {{ day }}
         </button>
@@ -39,45 +36,32 @@ import { ref, computed } from 'vue'
 
 const emit = defineEmits(['select'])
 
+const props = defineProps({
+  selectedDate: {
+    type: String,
+    default: ''
+  }
+})
+
 const today = new Date()
 
 const currentMonth = ref(today.getMonth())
 const currentYear = ref(today.getFullYear())
+const selectedDay = ref(null)
 
 const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
 const monthNames = [
-  'Январь',
-  'Февраль',
-  'Март',
-  'Апрель',
-  'Май',
-  'Июнь',
-  'Июль',
-  'Август',
-  'Сентябрь',
-  'Октябрь',
-  'Ноябрь',
-  'Декабрь'
+  'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+  'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
 ]
 
 const calendarDays = computed(() => {
-  const firstDay = new Date(
-      currentYear.value,
-      currentMonth.value,
-      1
-  )
-
+  const firstDay = new Date(currentYear.value, currentMonth.value, 1)
   let firstWeekDay = firstDay.getDay()
-
   if (firstWeekDay === 0) firstWeekDay = 7
 
-  const daysInMonth = new Date(
-      currentYear.value,
-      currentMonth.value + 1,
-      0
-  ).getDate()
-
+  const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate()
   const result = []
 
   for (let i = 1; i < firstWeekDay; i++) {
@@ -90,6 +74,14 @@ const calendarDays = computed(() => {
 
   return result
 })
+
+function isSelected(day) {
+  if (!props.selectedDate) return false
+  const date = new Date(props.selectedDate)
+  return date.getDate() === day && 
+         date.getMonth() === currentMonth.value && 
+         date.getFullYear() === currentYear.value
+}
 
 function prevMonth() {
   if (currentMonth.value === 0) {
@@ -110,13 +102,8 @@ function nextMonth() {
 }
 
 function selectDate(day) {
-  const date =
-      `${currentYear.value}-` +
-      `${String(currentMonth.value + 1).padStart(2, '0')}-` +
-      `${String(day).padStart(2, '0')}`
-
-  console.log(date)
-
+  const date = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  selectedDay.value = day
   emit('select', date)
 }
 </script>
@@ -125,14 +112,41 @@ function selectDate(day) {
 .calendar {
   width: 100%;
   max-width: 400px;
-  margin: auto;
+  background: transparent;
 }
 
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  padding: 0 8px;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #4a5b6e;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn:hover {
+  background: #f5f7fa;
+  border-color: #cbd5e1;
+}
+
+.month-year {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a2c3e;
 }
 
 .weekdays,
@@ -142,18 +156,66 @@ function selectDate(day) {
   gap: 4px;
 }
 
-.weekdays div {
+.weekday {
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
+  color: #7c8b9c;
+  padding: 8px 0;
 }
 
 .day-cell {
+  aspect-ratio: 1;
   min-height: 40px;
 }
 
 .day-btn {
   width: 100%;
-  height: 40px;
+  height: 100%;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
   cursor: pointer;
+  font-size: 14px;
+  color: #1a2c3e;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-btn:hover {
+  background: #f5f7fa;
+  border-color: #cbd5e1;
+}
+
+.day-btn.selected {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .calendar {
+    max-width: 100%;
+  }
+  
+  .weekday {
+    font-size: 12px;
+    padding: 6px 0;
+  }
+  
+  .day-btn {
+    font-size: 12px;
+  }
+  
+  .nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .month-year {
+    font-size: 14px;
+  }
 }
 </style>
