@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted, onMounted } from 'vue'
+import { ref, onUnmounted, onMounted } from 'vue'
 
 const emit = defineEmits(['change'])
 

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import ProgramSelector from "@/components/ProgramSelector.vue";
-import SemesterSelector from "@/components/SemesterSelector.vue";
 
 // Импорт всех вкладок
 import JournalTab from './JournalTab.vue'
