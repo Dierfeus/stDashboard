@@ -41,12 +41,11 @@ onUnmounted(() => {
 <template>
   <div class="program-selector">
 
-    <div class="box" @click="isOpen = !isOpen">
+    <div class="box" :class="{ open: isOpen }" @click="isOpen = !isOpen">
       <div class="text">
         {{ displayText }}
       </div>
 
-      <div class="arrow" :class="{ open: isOpen }">⌄</div>
     </div>
 
     <div v-if="isOpen" class="dropdown">
@@ -92,11 +91,14 @@ onUnmounted(() => {
   max-width: 90%;
 }
 
-.arrow {
+.box:after {
+  content: "▼";
+  font-size: 14px;
+  color: #618ffc;
   transition: transform .2s;
 }
 
-.arrow.open {
+.box.open:after {
   transform: rotate(180deg);
 }
 
@@ -119,4 +121,5 @@ onUnmounted(() => {
 .item:hover {
   background: #f2f4f8;
 }
+
 </style>
