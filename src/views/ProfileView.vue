@@ -112,7 +112,7 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
         <div class="profile-row">
           <div>
             <div class="profile-label">Льгота</div>
-            <div class="profile-value">Неполная семья</div>
+            <div class="profile-value">без льгот</div>
           </div>
         </div>
 
@@ -194,7 +194,7 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
         <div class="profile-row">
           <div>
             <div class="profile-label">Адрес</div>
-            <div class="profile-value">ул Киевская, дом 23, кв 74</div>
+            <div class="profile-value">ул Пушкина, дом 50, кв 100</div>
           </div>
         </div>
 
@@ -219,7 +219,7 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
         <div class="profile-row">
           <div>
             <div class="profile-label">Адрес</div>
-            <div class="profile-value">ул Киевская, дом 23, кв 74</div>
+            <div class="profile-value">ул Пушкина, дом 50, кв 100</div>
           </div>
         </div>
 
@@ -238,13 +238,13 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
     <div v-if="activeTab === 'docs'" class="profile-content">
       <div class="profile-card">
         <div class="profile-row">
-          <div class="profile-label">Студенческий билет</div>
-          <div class="profile-value">1235С9/27</div>
+          <div class="profile-label">Серия и номер</div>
+          <div class="profile-value">0123 456789</div>
         </div>
 
         <div class="profile-row">
-          <div class="profile-label">Справка</div>
-          <div class="profile-value">Доступна</div>
+          <div class="profile-label">Место выдачи</div>
+          <div class="profile-value">ГУ МВД РОСИИ ПО АЛТАЙСКОМУ КРАЮ</div>
         </div>
       </div>
     </div>

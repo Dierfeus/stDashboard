@@ -325,7 +325,7 @@ function formatDateTitle() {
       <div class="schedule-day">
         <div class="day-header">
           <span class="day-name">{{ formatDateTitle().split(' ')[0] }}</span>
-          <span class="day-date">{{ formatDateTitle() }}</span>
+          <span class="day-date">{{ formatDateTitle().split(' ')[1]+' '+formatDateTitle().split(' ')[2] }}</span>
         </div>
         
         <div class="schedule-table">
@@ -612,20 +612,53 @@ function formatDateTitle() {
   }
 
   .filter-buttons {
-    justify-content: center;
+    display: flex;
+    gap: 8px;
+    background: #f0f4f9;
+    padding: 4px;
+    border-radius: 48px;
   }
 
-  .lesson-row {
-    flex-direction: column;
+  @media (max-width: 400px) {
+    .filter-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 100%;
+    }
+
+    .filter-btn {
+      padding: 8px 4px;
+      font-size: 12px;
+    }
   }
 
-  .lesson-number,
-  .lesson-time {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid #f0f4f9;
-    padding: 12px 16px;
-    text-align: left;
+  @media (max-width: 768px) {
+    .lesson-number {
+      width: 45px;
+      min-width: 45px;
+      padding: 12px 8px;
+      font-size: 16px;
+    }
+
+    .lesson-time {
+      width: 75px;
+      min-width: 75px;
+      padding: 12px 8px;
+      font-size: 11px;
+    }
+
+    .lesson-details {
+      padding: 12px;
+    }
+
+    .lesson-title {
+      font-size: 14px;
+    }
+
+    .lesson-teacher,
+    .lesson-groups {
+      font-size: 12px;
+    }
   }
 
   .lesson-number {
