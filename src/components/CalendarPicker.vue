@@ -112,6 +112,7 @@ function selectDate(day) {
 .calendar {
   width: 100%;
   max-width: 400px;
+  margin: 0 auto;
   background: transparent;
 }
 
@@ -119,18 +120,18 @@ function selectDate(day) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 0 8px;
+  margin-bottom: 16px;
+  padding: 0 4px;
 }
 
 .nav-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #e2e8f0;
   background: white;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   color: #4a5b6e;
   transition: all 0.2s;
   display: flex;
@@ -144,7 +145,7 @@ function selectDate(day) {
 }
 
 .month-year {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #1a2c3e;
 }
@@ -159,24 +160,24 @@ function selectDate(day) {
 .weekday {
   text-align: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: #7c8b9c;
-  padding: 8px 0;
+  padding: 6px 0;
 }
 
 .day-cell {
   aspect-ratio: 1;
-  min-height: 40px;
 }
 
 .day-btn {
   width: 100%;
   height: 100%;
+  min-height: 36px;
   border: 1px solid #e2e8f0;
   background: white;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   color: #1a2c3e;
   transition: all 0.2s;
   display: flex;
@@ -195,27 +196,91 @@ function selectDate(day) {
   border-color: #2563eb;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .calendar {
     max-width: 100%;
   }
-  
-  .weekday {
-    font-size: 12px;
-    padding: 6px 0;
+
+  .calendar-header {
+    margin-bottom: 12px;
   }
-  
-  .day-btn {
-    font-size: 12px;
-  }
-  
+
   .nav-btn {
-    width: 32px;
-    height: 32px;
-  }
-  
-  .month-year {
+    width: 28px;
+    height: 28px;
     font-size: 14px;
+  }
+
+  .month-year {
+    font-size: 13px;
+  }
+
+  .weekday {
+    font-size: 11px;
+    padding: 4px 0;
+  }
+
+  .day-btn {
+    min-height: 32px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-header {
+    margin-bottom: 10px;
+  }
+
+  .nav-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .month-year {
+    font-size: 12px;
+  }
+
+  .weekday {
+    font-size: 10px;
+    padding: 3px 0;
+  }
+
+  .day-btn {
+    min-height: 28px;
+    font-size: 10px;
+  }
+
+  .weekdays,
+  .days {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 400px) {
+  .weekday {
+    font-size: 9px;
+  }
+
+  .day-btn {
+    min-height: 24px;
+    font-size: 9px;
+  }
+
+  .weekdays,
+  .days {
+    gap: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .weekday {
+    font-size: 8px;
+  }
+
+  .day-btn {
+    min-height: 22px;
+    font-size: 8px;
   }
 }
 </style>

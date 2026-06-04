@@ -38,13 +38,27 @@ async function timetable() {
   isLoading.value = true
   
   try {
-    const url = `https://api3.rb.asu.ru/api/v1/timetable/${timetabletype.value}/${timetableduration.value}/${selectedId.value}/${dates.value}`
-    console.log("Загрузка:", url)
+    let url
+    if (timetableduration.value === 'day') {
+      url = `https://api3.rb.asu.ru/api/v1/timetable/${timetabletype.value}/${timetableduration.value}/${selectedId.value}/${dates.value}`
+      const response = await fetch(url)
+      const data = await response.json()
+      qweresult.value = { type: 'day', data: data }
+    } 
+    else if (timetableduration.value === 'week') {
+      url = `https://api3.rb.asu.ru/api/v1/timetable/${timetabletype.value}/week/${selectedId.value}/${dates.value}`
+      const response = await fetch(url)
+      const data = await response.json()
+      qweresult.value = { type: 'week', data: data }
+    } 
+    else if (timetableduration.value === 'month') {
+      url = `https://api3.rb.asu.ru/api/v1/timetable/${timetabletype.value}/month/${selectedId.value}/${dates.value}`
+      const response = await fetch(url)
+      const data = await response.json()
+      qweresult.value = { type: 'month', data: data }
+    }
     
-    const response = await fetch(url)
-    const data = await response.json()
-    qweresult.value = data
-    console.log("Расписание загружено:", data)
+    console.log("Расписание загружено:", qweresult.value)
   } catch (error) {
     console.error("Ошибка при загрузке расписания:", error)
     qweresult.value = null
@@ -53,41 +67,28 @@ async function timetable() {
   }
 }
 
-function getFormattedLessons() {
-  if (!qweresult.value || !qweresult.value.value || qweresult.value.value.length === 0) {
+function getFormattedLessonsForDay(dayData) {
+  if (!dayData || !dayData.timeTable) {
     return []
   }
   
   const formattedLessons = []
-  const timetableData = qweresult.value.value[0]
   
-  if (timetableData && timetableData.timeTable) {
-    for (const timeSlot of timetableData.timeTable) {
-      if (timeSlot.lessons && timeSlot.lessons.length > 0) {
-        for (const lesson of timeSlot.lessons) {
-          formattedLessons.push({
-            lessonNumber: timeSlot.lessonNumber,
-            startTime: timeSlot.startTime,
-            endTime: timeSlot.endTime,
-            disciplineName: lesson.disciplineName || '—',
-            lessonName: lesson.lessonName || '—',
-            room: lesson.room || '—',
-            teachers: lesson.teachers || [],
-            groups: lesson.groups || [],
-            isDistant: lesson.isDistant || false
-          })
-        }
-      } else {
+  for (const timeSlot of dayData.timeTable) {
+    if (timeSlot.lessons && timeSlot.lessons.length > 0) {
+      for (const lesson of timeSlot.lessons) {
         formattedLessons.push({
           lessonNumber: timeSlot.lessonNumber,
           startTime: timeSlot.startTime,
           endTime: timeSlot.endTime,
-          disciplineName: 'Нет занятия',
-          lessonName: '—',
-          room: '—',
-          teachers: [],
-          groups: [],
-          isEmpty: true
+          disciplineName: lesson.disciplineName || '—',
+          lessonName: lesson.lessonName || '—',
+          room: lesson.room || '—',
+          roomId: lesson.roomId,
+          teachers: lesson.teachers || [],
+          groups: lesson.groups || [],
+          isDistant: lesson.isDistant || false,
+          isHighlighted: lesson.isHighlighted || false
         })
       }
     }
@@ -96,8 +97,8 @@ function getFormattedLessons() {
   return formattedLessons
 }
 
-function getGroupedLessons() {
-  const lessons = getFormattedLessons()
+function getGroupedLessonsForDay(dayData) {
+  const lessons = getFormattedLessonsForDay(dayData)
   const grouped = {}
   
   lessons.forEach(lesson => {
@@ -113,6 +114,28 @@ function getGroupedLessons() {
   })
   
   return Object.values(grouped)
+}
+
+function getAllScheduleData() {
+  if (!qweresult.value || !qweresult.value.data || !qweresult.value.data.value) {
+    return []
+  }
+  
+  const scheduleData = []
+  const days = qweresult.value.data.value
+  
+  for (const day of days) {
+    const grouped = getGroupedLessonsForDay(day)
+    if (grouped.length > 0) {
+      scheduleData.push({
+        date: day.date,
+        groupedLessons: grouped,
+        hasLessons: true
+      })
+    }
+  }
+  
+  return scheduleData
 }
 
 function formatTimeRange(startTime, endTime) {
@@ -148,6 +171,24 @@ function getLessonTypeBadge(lessonName) {
   if (lessonName?.includes('Лабораторное')) return { text: 'Лабораторная', class: 'lab' }
   if (lessonName?.includes('Семинар')) return { text: 'Семинар', class: 'seminar' }
   return { text: 'Занятие', class: 'default' }
+}
+
+function goToGroupSchedule(groupId) {
+  if (!groupId) return
+  timetabletype.value = 'group'
+  selectedId.value = groupId
+}
+
+function goToTeacherSchedule(teacherId) {
+  if (!teacherId) return
+  timetabletype.value = 'teacher'
+  selectedId.value = teacherId
+}
+
+function goToRoomSchedule(roomId) {
+  if (!roomId) return
+  timetabletype.value = 'room'
+  selectedId.value = roomId
 }
 
 async function group_list() {
@@ -221,9 +262,9 @@ watch(timetabletype, () => {
   }
 })
 
-function formatDateTitle() {
-  if (!dates.value) return ''
-  const date = new Date(dates.value)
+function formatDateTitle(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
   const days = ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
   const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
   
@@ -321,27 +362,53 @@ function formatDateTitle() {
       <p>Загрузка расписания...</p>
     </div>
 
-    <div v-else-if="getGroupedLessons().length > 0" class="schedule">
-      <div class="schedule-day">
+    <div v-else-if="getAllScheduleData().length > 0" class="schedule">
+      <div v-for="(daySchedule, dayIndex) in getAllScheduleData()" :key="dayIndex" class="schedule-day">
         <div class="day-header">
-          <span class="day-name">{{ formatDateTitle().split(' ')[0] }}</span>
-          <span class="day-date">{{ formatDateTitle().split(' ')[1]+' '+formatDateTitle().split(' ')[2] }}</span>
+          <span class="day-name">{{ formatDateTitle(daySchedule.date).split(' ')[0] }}</span>
+          <span class="day-date">{{ formatDateTitle(daySchedule.date) }}</span>
         </div>
         
         <div class="schedule-table">
-          <div v-for="group in getGroupedLessons()" :key="group.lessonNumber" class="lesson-row">
+          <div v-for="group in daySchedule.groupedLessons" :key="group.lessonNumber" class="lesson-row">
             <div class="lesson-number">{{ group.lessonNumber }}</div>
             <div class="lesson-time">{{ formatTimeRange(group.startTime, group.endTime) }}</div>
             <div class="lesson-details">
-              <div v-for="(lesson, idx) in group.lessons" :key="idx" class="lesson-card">
+              <div v-for="(lesson, idx) in group.lessons" :key="idx" class="lesson-card" :class="{ 'highlighted': lesson.isHighlighted }">
                 <div class="lesson-header">
                   <span :class="['lesson-badge', getLessonTypeBadge(lesson.lessonName).class]">
                     {{ getLessonTypeBadge(lesson.lessonName).text }}
                   </span>
                 </div>
                 <div class="lesson-title">{{ lesson.disciplineName }}</div>
-                <div class="lesson-teacher">{{ formatTeachers(lesson.teachers) }}</div>
-                <div class="lesson-groups">{{ formatGroups(lesson.groups) }}</div>
+                <div class="lesson-teacher">
+                  <span v-if="timetabletype !== 'teacher' && lesson.teachers[0]?.id" 
+                        class="link" 
+                        @click="goToTeacherSchedule(lesson.teachers[0].id)">
+                    {{ formatTeachers(lesson.teachers) }}
+                  </span>
+                  <span v-else>{{ formatTeachers(lesson.teachers) }}</span>
+                </div>
+                <div class="lesson-room">
+                  <span v-if="timetabletype !== 'room' && lesson.roomId" 
+                        class="link" 
+                        @click="goToRoomSchedule(lesson.roomId)">
+                    Ауд. {{ lesson.room }}
+                  </span>
+                  <span v-else>Ауд. {{ lesson.room }}</span>
+                </div>
+                <div class="lesson-groups">
+                  <template v-for="(groupItem, gIdx) in lesson.groups" :key="groupItem.id">
+                    <span v-if="timetabletype !== 'group'" 
+                          class="link" 
+                          @click="goToGroupSchedule(groupItem.id)">
+                      {{ groupItem.name }}
+                    </span>
+                    <span v-else>{{ groupItem.name }}</span>
+                    <span v-if="gIdx < lesson.groups.length - 1">, </span>
+                  </template>
+                  <span v-if="!lesson.groups.length">—</span>
+                </div>
               </div>
             </div>
           </div>
@@ -350,7 +417,7 @@ function formatDateTitle() {
     </div>
     
     <div v-else-if="selectedId && dates && !isLoading" class="empty-state">
-      <p>Нет занятий на выбранную дату</p>
+      <p>Нет занятий на выбранный период</p>
     </div>
   </div>
 </template>
@@ -376,7 +443,6 @@ function formatDateTitle() {
 
 .filter-buttons {
   display: flex;
-  gap: 8px;
   background: #f0f4f9;
   padding: 4px;
   border-radius: 48px;
@@ -458,6 +524,7 @@ function formatDateTitle() {
   border-radius: 24px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04);
+  margin-bottom: 100px;
 }
 
 .schedule-day {
@@ -503,9 +570,10 @@ function formatDateTitle() {
 }
 
 .lesson-number {
-  width: 70px;
-  padding: 20px 16px;
-  font-size: 20px;
+  width: 55px;
+  min-width: 55px;
+  padding: 20px 12px;
+  font-size: 18px;
   font-weight: 700;
   color: #2563eb;
   text-align: center;
@@ -514,9 +582,10 @@ function formatDateTitle() {
 }
 
 .lesson-time {
-  width: 110px;
-  padding: 20px 16px;
-  font-size: 13px;
+  width: 100px;
+  min-width: 100px;
+  padding: 20px 12px;
+  font-size: 12px;
   color: #7c8b9c;
   border-right: 1px solid #f0f4f9;
   background: #fafcff;
@@ -527,14 +596,23 @@ function formatDateTitle() {
 .lesson-details {
   flex: 1;
   padding: 16px;
+  min-width: 0;
 }
 
 .lesson-card {
   margin-bottom: 16px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .lesson-card:last-child {
   margin-bottom: 0;
+}
+
+.lesson-card.highlighted {
+  background: #fff9e6;
+  border-left: 3px solid #f59e0b;
+  padding-left: 12px;
 }
 
 .lesson-header {
@@ -579,17 +657,40 @@ function formatDateTitle() {
   font-weight: 600;
   color: #1a2c3e;
   margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.lesson-teacher,
+.lesson-room,
+.lesson-groups {
+  font-size: 13px;
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
 
 .lesson-teacher {
-  font-size: 13px;
   color: #7c8b9c;
-  margin-bottom: 6px;
+}
+
+.lesson-room {
+  color: #6c7a8e;
 }
 
 .lesson-groups {
   font-size: 12px;
   color: #9ca3af;
+}
+
+.link {
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #1e40af;
+  text-decoration: underline;
 }
 
 .empty-state {
@@ -612,73 +713,92 @@ function formatDateTitle() {
   }
 
   .filter-buttons {
-    display: flex;
-    gap: 8px;
-    background: #f0f4f9;
-    padding: 4px;
-    border-radius: 48px;
+    justify-content: center;
+  }
+  
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 
-  @media (max-width: 400px) {
-    .filter-buttons {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      width: 100%;
-    }
-
-    .filter-btn {
-      padding: 8px 4px;
-      font-size: 12px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .lesson-number {
-      width: 45px;
-      min-width: 45px;
-      padding: 12px 8px;
-      font-size: 16px;
-    }
-
-    .lesson-time {
-      width: 75px;
-      min-width: 75px;
-      padding: 12px 8px;
-      font-size: 11px;
-    }
-
-    .lesson-details {
-      padding: 12px;
-    }
-
-    .lesson-title {
-      font-size: 14px;
-    }
-
-    .lesson-teacher,
-    .lesson-groups {
-      font-size: 12px;
-    }
+  .lesson-row {
+    flex-wrap: nowrap;
+    align-items: flex-start;
   }
 
   .lesson-number {
+    width: 45px;
+    min-width: 45px;
+    padding: 16px 8px;
     font-size: 16px;
   }
 
   .lesson-time {
-    padding-top: 0;
+    width: 75px;
+    min-width: 75px;
+    padding: 16px 8px;
+    font-size: 10px;
   }
 
   .lesson-details {
-    padding: 16px;
+    padding: 12px;
   }
 
+  .lesson-title {
+    font-size: 14px;
+  }
+
+  .lesson-teacher,
+  .lesson-room,
+  .lesson-groups {
+    font-size: 11px;
+  }
+  
+  .lesson-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+  
   .day-header {
-    padding: 16px;
+    padding: 12px 16px;
+  }
+  
+  .day-name {
+    font-size: 16px;
+  }
+  
+  .day-date {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-number {
+    width: 40px;
+    min-width: 40px;
+    padding: 12px 6px;
+    font-size: 14px;
   }
 
-  .day-name {
-    font-size: 18px;
+  .lesson-time {
+    width: 65px;
+    min-width: 65px;
+    padding: 12px 6px;
+    font-size: 9px;
+  }
+  
+  .lesson-details {
+    padding: 10px;
+  }
+  
+  .lesson-title {
+    font-size: 13px;
+  }
+  
+  .lesson-teacher,
+  .lesson-room,
+  .lesson-groups {
+    font-size: 10px;
   }
 }
 </style>
