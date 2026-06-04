@@ -131,7 +131,6 @@ const logout = () => {
 
     <div class="profile-card logout-card">
       <button class="logout-btn" @click="logout">
-        <span class="logout-icon">↩</span>
         Выйти из аккаунта
       </button>
     </div>
@@ -226,7 +225,4 @@ const logout = () => {
   color: #fff;
 }
 
-.logout-icon {
-  font-size: 22px;
-}
 </style>
