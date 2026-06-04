@@ -10,19 +10,10 @@ export default defineConfig({
     vue(),
     vueDevTools(),
   ],
-  base: '/',
+  base: '/stDashboard/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://rb.asu.ru',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
-  }
 })

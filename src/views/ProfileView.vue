@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import ProgramSelector from "@/components/ProgramSelector.vue";
 
+const router = useRouter()
+
 const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
+
+const logout = () => {
+  router.push('/')
+}
 </script>
 
 <template>
@@ -247,6 +254,14 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
           <div class="profile-value">ГУ МВД РОСИИ ПО АЛТАЙСКОМУ КРАЮ</div>
         </div>
       </div>
+
+    </div>
+
+    <div class="profile-card logout-card">
+      <button class="logout-btn" @click="logout">
+        <span class="logout-icon">↩</span>
+        Выйти из аккаунта
+      </button>
     </div>
 
 
@@ -308,4 +323,41 @@ const activeTab = ref<'main' | 'contacts' | 'docs'>('main')
   object-position: center;
   display: block;
 }
+
+.logout-card {
+  margin-top: 32px;
+  overflow: hidden;
+}
+
+.logout-btn {
+  width: 100%;
+  min-height: 64px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #e14d4d;
+  cursor: pointer;
+
+  transition: background .2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 77, 77, .72);
+  color: #fff;
+}
+
+.logout-btn:active {
+  background: rgba(255, 77, 77, .72);
+  color: #fff;
+}
+
+.logout-icon {
+  font-size: 22px;
+}
+
 </style>
