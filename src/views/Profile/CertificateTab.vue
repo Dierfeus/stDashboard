@@ -179,7 +179,6 @@ function cancelCertificate(id: number) {
   border-left: 4px solid #2563eb;
 }
 
-.info-icon { font-size: 24px; }
 .info-text { font-size: 14px; color: #1e3a5f; line-height: 1.4; }
 .info-text strong { color: #2563eb; }
 .info-text strong { color: #2563eb; }
