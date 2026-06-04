@@ -13,7 +13,13 @@ const mas_group = ref([])
 const mas_room = ref([])
 const mas_teacherstaff = ref([])
 
+function getTodayDate() {
+  const today = new Date()
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+}
+
 onMounted(() => {
+  dates.value = getTodayDate()
   group_list()
   room_list()
   teacherstaff_list()
@@ -83,12 +89,14 @@ function getFormattedLessonsForDay(dayData) {
           endTime: timeSlot.endTime,
           disciplineName: lesson.disciplineName || '—',
           lessonName: lesson.lessonName || '—',
+          shortLessonName: lesson.shortLessonName || '—',
           room: lesson.room || '—',
           roomId: lesson.roomId,
           teachers: lesson.teachers || [],
           groups: lesson.groups || [],
           isDistant: lesson.isDistant || false,
-          isHighlighted: lesson.isHighlighted || false
+          isHighlighted: lesson.isHighlighted || false,
+          idDisciplineType: lesson.idDisciplineType
         })
       }
     }
@@ -165,12 +173,41 @@ function handleDate(date) {
   dates.value = date
 }
 
-function getLessonTypeBadge(lessonName) {
-  if (lessonName?.includes('Лекция')) return { text: 'Лекция', class: 'lecture' }
-  if (lessonName?.includes('Практическое')) return { text: 'Практика', class: 'practice' }
-  if (lessonName?.includes('Лабораторное')) return { text: 'Лабораторная', class: 'lab' }
-  if (lessonName?.includes('Семинар')) return { text: 'Семинар', class: 'seminar' }
+function getLessonTypeBadge(lessonName, idDisciplineType) {
+  if (lessonName?.includes('Консультация') || idDisciplineType === 9) {
+    return { text: 'Консультация', class: 'consultation' }
+  }
+  if (lessonName?.includes('Экзамен') || idDisciplineType === 5) {
+    return { text: 'Экзамен', class: 'exam' }
+  }
+  if (lessonName?.includes('Зачет') || idDisciplineType === 6) {
+    return { text: 'Зачет', class: 'credit' }
+  }
+  if (lessonName?.includes('Лекция') || idDisciplineType === 1) {
+    return { text: 'Лекция', class: 'lecture' }
+  }
+  if (lessonName?.includes('Практическое') || idDisciplineType === 3) {
+    return { text: 'Практика', class: 'practice' }
+  }
+  if (lessonName?.includes('Лабораторное') || idDisciplineType === 2) {
+    return { text: 'Лабораторная', class: 'lab' }
+  }
+  if (lessonName?.includes('Курсовая') || idDisciplineType === 4) {
+    return { text: 'Курсовая', class: 'coursework' }
+  }
+  if (lessonName?.includes('Семинар')) {
+    return { text: 'Семинар', class: 'seminar' }
+  }
   return { text: 'Занятие', class: 'default' }
+}
+
+function getLessonNumber(shortLessonName) {
+  if (!shortLessonName || shortLessonName === '—') return ''
+  const match = shortLessonName.match(/\d+/)
+  if (match) {
+    return ` №${match[0]}`
+  }
+  return ''
 }
 
 function goToGroupSchedule(groupId) {
@@ -198,7 +235,7 @@ async function group_list() {
     
     if (data && data.value) {
       mas_group.value = data.value
-      if (mas_group.value.length > 0 && timetabletype.value === 'group' && !selectedId.value) {
+      if (mas_group.value.length > 0 && !selectedId.value && timetabletype.value === 'group') {
         selectedId.value = mas_group.value[0].id
       }
     }
@@ -218,7 +255,7 @@ async function room_list() {
         id: room.idAuditorium
       }))
       
-      if (mas_room.value.length > 0 && timetabletype.value === 'room' && !selectedId.value) {
+      if (mas_room.value.length > 0 && !selectedId.value && timetabletype.value === 'room') {
         selectedId.value = mas_room.value[0].id
       }
     }
@@ -234,7 +271,7 @@ async function teacherstaff_list() {
     
     if (data && Array.isArray(data.value)) {
       mas_teacherstaff.value = data.value
-      if (mas_teacherstaff.value.length > 0 && timetabletype.value === 'teacher' && !selectedId.value) {
+      if (mas_teacherstaff.value.length > 0 && !selectedId.value && timetabletype.value === 'teacher') {
         selectedId.value = mas_teacherstaff.value[0].id
       }
     }
@@ -250,17 +287,6 @@ function getTeacherDisplayName(teacher) {
 function getRoomDisplayName(room) {
   return room.title
 }
-
-watch(timetabletype, () => {
-  selectedId.value = null
-  if (timetabletype.value === 'group' && mas_group.value.length > 0) {
-    selectedId.value = mas_group.value[0].id
-  } else if (timetabletype.value === 'room' && mas_room.value.length > 0) {
-    selectedId.value = mas_room.value[0].id
-  } else if (timetabletype.value === 'teacher' && mas_teacherstaff.value.length > 0) {
-    selectedId.value = mas_teacherstaff.value[0].id
-  }
-})
 
 function formatDateTitle(dateStr) {
   if (!dateStr) return ''
@@ -354,7 +380,7 @@ function formatDateTitle(dateStr) {
     </div>
 
     <div class="calendar-wrapper">
-      <CalendarPicker @select="handleDate" />
+      <CalendarPicker @select="handleDate" :selected-date="dates" />
     </div>
 
     <div v-if="isLoading" class="loading-state">
@@ -376,9 +402,10 @@ function formatDateTitle(dateStr) {
             <div class="lesson-details">
               <div v-for="(lesson, idx) in group.lessons" :key="idx" class="lesson-card" :class="{ 'highlighted': lesson.isHighlighted }">
                 <div class="lesson-header">
-                  <span :class="['lesson-badge', getLessonTypeBadge(lesson.lessonName).class]">
-                    {{ getLessonTypeBadge(lesson.lessonName).text }}
+                  <span :class="['lesson-badge', getLessonTypeBadge(lesson.lessonName, lesson.idDisciplineType).class]">
+                    {{ getLessonTypeBadge(lesson.lessonName, lesson.idDisciplineType).text }}{{ getLessonNumber(lesson.shortLessonName) }}
                   </span>
+                  <span v-if="lesson.isHighlighted" class="last-lesson-badge">Последнее занятие</span>
                 </div>
                 <div class="lesson-title">{{ lesson.disciplineName }}</div>
                 <div class="lesson-teacher">
@@ -518,7 +545,7 @@ function formatDateTitle(dateStr) {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-
+ 
 .schedule {
   background: white;
   border-radius: 24px;
@@ -603,6 +630,7 @@ function formatDateTitle(dateStr) {
   margin-bottom: 16px;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  position: relative;
 }
 
 .lesson-card:last-child {
@@ -617,6 +645,10 @@ function formatDateTitle(dateStr) {
 
 .lesson-header {
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .lesson-badge {
@@ -642,14 +674,50 @@ function formatDateTitle(dateStr) {
   color: #f59e0b;
 }
 
+.lesson-badge.coursework {
+  background: #f0e9ff;
+  color: #8b5cf6;
+}
+
 .lesson-badge.seminar {
   background: #f0e9ff;
   color: #8b5cf6;
 }
 
+.lesson-badge.exam {
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 700;
+  border: 1px solid #fecaca;
+}
+
+.lesson-badge.credit {
+  background: #dbeafe;
+  color: #2563eb;
+  font-weight: 700;
+  border: 1px solid #bfdbfe;
+}
+
+.lesson-badge.consultation {
+  background: #e6e6fa;
+  color: #7c3aed;
+  font-weight: 700;
+  border: 1px solid #d8b4fe;
+}
+
 .lesson-badge.default {
   background: #f0f4f9;
   color: #6c7a8e;
+}
+
+.last-lesson-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .lesson-title {
@@ -699,6 +767,7 @@ function formatDateTitle(dateStr) {
   background: white;
   border-radius: 24px;
   color: #9ca3af;
+  margin-bottom: 100px;
 }
 
 @media (max-width: 768px) {
@@ -754,7 +823,8 @@ function formatDateTitle(dateStr) {
     font-size: 11px;
   }
   
-  .lesson-badge {
+  .lesson-badge,
+  .last-lesson-badge {
     font-size: 10px;
     padding: 2px 8px;
   }
