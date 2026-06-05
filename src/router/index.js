@@ -4,7 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import HomeView from '../views/HomeView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
 import StudyProcessView from '@/views/studyProcess/StudyProcessView.vue'
-import ProfileView from '../views/ProfileView.vue'
+import ProfileView from '../views/Profile/ProfileView.vue'
 import NotFoundView from "@/views/NotFoundView.vue";
 
 export default createRouter({
