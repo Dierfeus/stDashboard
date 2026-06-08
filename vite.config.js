@@ -21,6 +21,15 @@ export default defineConfig({
         display: 'standalone',
         scope: '/stDashboard/',
         start_url: '/stDashboard/',
+        server: {
+          proxy: {
+            '/api': {
+              target: 'https://api.rb.asu.ru',
+              changeOrigin: true,
+              rewrite: (path) => path.replace(/^\/api/, '')
+            }
+          }
+        },
         icons: [
           {
             src: '/stDashboard/icons/icon-192x192.svg',
