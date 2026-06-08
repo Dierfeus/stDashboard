@@ -448,7 +448,6 @@ function formatDateTitle(dateStr) {
     </div>
   </div>
 </template>
-
 <style scoped>
 .timetable-app {
   max-width: 1200px;

@@ -9,7 +9,7 @@ import ContactsTab from "@/views/Profile/ContactsTab.vue";
 import DocumentsTab from "@/views/Profile/DocumentsTab.vue";
 import CertificateTab from "@/views/Profile/CertificateTab.vue";
 
-type TabType = 'main' | 'contacts' | 'docs' | 'certificates'
+type TabType = 'main' | 'contacts' | 'docs' | 'certificates' | 'documentoborot'
 
 const activeTab = ref<TabType>('main')
 </script>
@@ -48,6 +48,13 @@ const activeTab = ref<TabType>('main')
         @click="activeTab = 'certificates'"
     >
       Заказ справок
+    </button>
+    <button
+        class="tab"
+        :class="{ active: activeTab === 'documentoborot' }"
+        @click="activeTab = 'documentoborot'"
+    >
+      Документооборот
     </button>
   </div>
 
